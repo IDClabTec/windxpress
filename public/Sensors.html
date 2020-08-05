@@ -1,0 +1,285 @@
+<html>
+  <head>
+        <meta charset="utf-8">
+        <style type="text/css">
+table, th, td {
+  border: 1px solid black;
+}
+</style>
+  </head>
+  <body>
+     <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.2/mqttws31.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="http://www.gstatic.com/charts/loader.js"></script>
+
+    <!-- jQuery -->
+  <script src="js/jquery.js"></script>
+  <!-- nav -->
+  <script src="js/jquery.scrollTo.js"></script>
+  <script src="js/jquery.nav.js"></script>
+  <!-- localScroll -->
+  <script src="js/jquery.localScroll.js"></script>
+  <!-- bootstrap -->
+  <script src="js/bootstrap.js"></script>
+  <!-- prettyPhoto -->
+  <script src="js/jquery.prettyPhoto.js"></script>
+  <!-- Works scripts -->
+  <script src="js/isotope.js"></script>
+  <!-- flexslider -->
+  <script src="js/jquery.flexslider.js"></script>
+  <!-- inview -->
+  <script src="js/inview.js"></script>
+  <!-- animation -->
+  <script src="js/animate.js"></script>
+  <!-- twitter -->
+  <!--<script src="js/jquery.tweet.js"></script>-->
+  <!-- custom functions -->
+  <script src="js/custom.js"></script>
+    <!--Canvas JS-->
+     <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+          <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
+     <script type="text/javascript" src="js/kuma-gauge.jquery.js"></script>
+
+
+    <!--Rgraph-->
+    <script src="js/RGraph.common.core.js"></script>
+    <script src="js/RGraph.line.js"></script>
+    <!-- --> 
+      <div type="container">
+          <h4>MQTT STATUS:</h4><strong id="mqttStatus">disconnected</strong>
+        <hr>
+    </div>
+    </body>
+</html>
+<div id="chartContainer"> </div>
+ <script type="text/javascript" src="js/googleChart.js"></script>
+   <script type="text/javascript">
+    var SensorData
+  $.ajax({
+    url: "/getDataSensors",
+    type: "POST",
+    data: {'user': new URLSearchParams(window.location.search).get("user")}
+
+  }).done(function(data){
+    var options = document.createElement('div')
+    var Sensors = JSON.parse(data);
+    var datalist = ''
+    for(var i=0;i<Sensors.length;i++){datalist+= '<option>'+Sensors[i].Name+'</option>'}
+    console.log(options)
+    $('#list').html('<datalist id="datalist">'+datalist+'</datalist>')
+    SensorData = [{'dir': Sensors[0].Dir,'current': 0, 'last': 0}]
+    for(var e=1; e<Sensors.length; e++){
+      var json = {'dir': Sensors[e].Dir,'current': 0, 'last': 0}
+      SensorData.push(json)
+    };
+
+    google.charts.load('current', {'packages':['gauge']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+    var array = [
+          ['Label', 'Value'],
+        ]
+    for(var i=0;i<Sensors.length; i++){
+    
+    array.push([Sensors[i].Name, 0]);
+
+    }
+        var data = google.visualization.arrayToDataTable(array);
+
+        var options = {
+          width: 600, height: 220,
+          redFrom: 90, redTo: 100,
+          yellowFrom:75, yellowTo: 90,
+          minorTicks: 5
+        };
+
+        var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
+
+        chart.draw(data, options);
+
+        setInterval(function() {
+        for(var i=0; i<SensorData.length; i++){
+          console.log(SensorData[i])
+          console.log(i)
+          if(SensorData[i].current!=SensorData[i].last){
+          data.setValue(i, 1, SensorData[i].current);
+          chart.draw(data, options);
+        } else if(SensorData[i].current==SensorData[i].last){
+          if(SensorData[i].current==NaN){
+            data.setValue(i, 1, 0);
+            console.log('El sensor no esta conectado');
+          } else if(SensorData[i].current==0){
+            data.setValue(i,1,0)
+        }}
+        console.log(SensorData[i].current);
+        SensorData[0].last = SensorData[0].current
+        }
+      }, 1000);
+        
+      }
+      var client = new Paho.MQTT.Client( '192.168.43.213', 1884, 'clientId');
+  client.onConnectionLost = onConnectionLost;
+  client.onMessageArrived = onMessageArrived;
+  client.connect({onSuccess:onConnect});
+  var onConnect 
+  console.log(client)
+  function onConnect() {
+  // Once a connection has been made, make a subscription and send a message.
+  console.log("onConnect");
+  client.subscribe("temperatura")
+  document.getElementById("mqttStatus").innerHTML = "connected";
+};
+function onConnectionLost(responseObject) {
+  if (responseObject.errorCode !== 0)  
+  console.log("onConnectionLost:"+responseObject.errorMessage);
+  document.getElementById("mqttStatus").innerHTML = "disconnected";
+};
+function onMessageArrived(message) {
+  console.log("onMessageArrived: "+message.payloadString);
+  if("number"==typeof(parseFloat(message.payloadString.split('|')[0]))){
+  var msg = message.payloadString;
+  var dir = msg.split('|')[0];
+  var mark = msg.split('|')[1];
+  for(var i = 0; i < SensorData.length; i++){
+    if(SensorData[i].dir == dir){
+      SensorData[i].current=mark;
+      console.log('find');
+        
+        }}} 
+    }; 
+
+});
+
+ 
+  
+  
+    </script>
+  </head>
+  <body>
+    <header class="header">
+
+</section>
+
+      
+    <div id="chart_div" style="width: 400px; height: 120px;"></div>
+  </body>
+</html>
+
+<div class="jquery-script-clear"></div>
+</div>
+</div>
+    <div class="js-gauge js-gauge--1 gauge"></div>
+    <div class="js-gauge js-gauge--2 gauge"></div>
+
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
+    <script type="text/javascript" src="js/kuma-gauge.jquery.js"></script>
+
+    <script>
+    function takeSamples(){
+      console.log($('#sensorSelected').val())
+      console.log(document.querySelector('#list').value)
+      var sensor= $('#sensorSelected').val();var time= Math.floor(($('#time').val()*3600)*1000); var interval = Math.floor($('#interval').val()*1000);
+      $.ajax({
+        url: '/takeSamples',
+        type: 'POST',
+        data: {'sensor': sensor, 'time':time, 'interval':interval, 'user':new URLSearchParams(window.location.search).get("user")},
+        beforeSend: function(){
+          console.log('enviando...')
+        },
+      })
+      .done(function() {
+        console.log("success");
+      })
+      .fail(function() {
+        console.log("error");
+      })
+      .always(function() {
+        console.log("complete");
+      });
+      
+
+    };
+    function calcular_Area(x,y,constan){
+      var area = 0;
+        if(constan==true){
+          console.log(new Date(x[0]))
+          var interval=parseFloat((new Date(x[1])-new Date(x[0]))/1000);for(var i=0;i<y.length;i++){console.log(interval);area+=parseFloat(parseFloat(y[i])*interval);}; return area;
+        } else if(constan==false){
+            for(var i=0;i<x.length;i++){
+              if(i==0){
+                area+=parseFloat(y[i]*parseFloat(new Date(x[i+1])-new Date(x[i]))/1000);
+              } else {
+                console.log(area)
+              area+=parseFloat(y[i]*parseFloat((new Date(x[i])-new Date(x[i-1])))/1000);
+            }} 
+            return area;
+        }
+      }
+
+    function view(){
+      var sensor= $('#sensorSelected').val();
+    $.ajax({
+        url: '/viewSamples',
+        type: 'POST',
+        data: {'sensor': sensor,'user':new URLSearchParams(window.location.search).get("user")},
+        beforeSend: function(){
+          console.log('enviando...')
+        },
+      }).done(function(data){
+        var data=JSON.parse(data);
+        console.log(data.length);
+        var table = document.createElement('div');
+        var list = '';
+        var average = 0;
+        var label = [[],[]];
+        for(var i=0;i<data.length;i++){
+          average+=parseFloat(data[i].sample)
+          list+='<tr><td>'+data[i].time+'</td><td>'+data[i].sample+'</td></tr>'
+          label[0][i]=data[i].time;label[1][i]=data[i].sample;
+        };
+        var area = calcular_Area(label[0],label[1],true)
+        console.log(area);
+        average = (average/data.length)
+        table.innerHTML+='<h4>Mostrando datos de:  '+sensor+'</h4><h4><strong>Promedio:</strong>  '+average+'</h4><h4>Area bajo la curva: '+area+'</h4><table style="width:100%"<tr><th>Tiempo</t><th>Muestra</th><tr>'+list+'</table>'
+        console.log(table)
+        $('#viewData').append(table)
+      })
+    }
+function a(){console.log('puta')}
+    </script>
+<br>
+<br>
+<br>
+<h3><strong>TOMA DE DATOS</strong></h3>
+<section id="data" class="container">
+  <div id="list">
+</div>
+
+<label>Sensor:<input type="list" id="sensorSelected"list="datalist"></label>
+<br>
+<label for="time">Horas por las cuales el sensor tomara datos<input type="number" id="time" name="hours" placeholder="Horas"></label>
+<br></br>
+<label>Tiempo entre cada muestra<input type="number" name="interval" id="interval" placeholder="Segundos entre cada muestra"></label><br><br>
+<button onclick="takeSamples(this)">Tomar muestras</button><button onclick="view()">Ver Datos</button>
+</section> 
+
+<div id="viewData"><h2>DATOS</h2></div>
+  </body>
+
+
+
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<input id="img" type="file" name="img">
+<script type="text/javascript">
+  const img = document.getElementById('img');
+  img.addEventListener('change',(event)=>{
+console.log(event.target.files[0]);
+const obj = URL.createObjectURL(event.target.files[0]);
+console.log(obj);
+$("#preview").append('<img src='+obj+'>')
+  })
+</script>
+<dir id="preview"></dir>
