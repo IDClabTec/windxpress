@@ -1,2 +1,6 @@
-This template was made by Colorlib (https://colorlib.com)
-Please visit our website for more awesome templates, themes and tools. 
+Thanks for downloading this template!
+
+Template Name: Maxim
+Template URL: https://bootstrapmade.com/maxim-free-onepage-bootstrap-theme/
+Author: BootstrapMade.com
+License: https://bootstrapmade.com/license/
