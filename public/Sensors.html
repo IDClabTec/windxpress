@@ -118,7 +118,7 @@ table, th, td {
       }, 1000);
         
       }
-      var client = new Paho.MQTT.Client( '192.168.43.213', 1884, 'clientId');
+      var client = new Paho.MQTT.Client( '48.101.114.216', 1884, 'clientwsId'+Math.floor(Math.random() * 10000));
   client.onConnectionLost = onConnectionLost;
   client.onMessageArrived = onMessageArrived;
   client.connect({onSuccess:onConnect});
@@ -127,7 +127,7 @@ table, th, td {
   function onConnect() {
   // Once a connection has been made, make a subscription and send a message.
   console.log("onConnect");
-  client.subscribe("temperatura")
+  client.subscribe("mcu/Living/temperatura")
   document.getElementById("mqttStatus").innerHTML = "connected";
 };
 function onConnectionLost(responseObject) {
