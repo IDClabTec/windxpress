@@ -23,14 +23,14 @@ const mongoose = require('mongoose')
 
 var mqtt = require('mqtt');
 
-var client  = mqtt.connect('mqtt://192.168.43.213:1883',{ keepalive: 10,
+var client  = mqtt.connect('mqtt://48.101.114.216:1883',{ keepalive: 10,
   protocolId: 'MQTT',
   protocolVersion: 4,
   clean: true,
   reconnectPeriod: 1000,
   resubscribeOnReconnect: true});
 
-var clienthtml = mqtt.connect('ws://192.168.43.213:1884',{ keepalive: 10,
+var clienthtml = mqtt.connect('ws://48.101.114.216:1884',{ keepalive: 10,
   reschedulePings: true,
   protocolId: 'MQTT',
   protocolVersion: 4,
@@ -87,7 +87,7 @@ db.once('open', function() {
 var settings = {
   port: 1883,
   http: {
-    host: "192.168.43.213",
+    host: "48.101.114.216",
     port: 1884,
     bundle: true,
     static: './sensors'
