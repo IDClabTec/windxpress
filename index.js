@@ -309,7 +309,7 @@ app.get('/page', function(req,res){
 
 
 app.get('/',function(req,res){
-  res.render('index') 
+  res.render('index1') 
 })
 
 app.get('/LoginError', function(req,res){
